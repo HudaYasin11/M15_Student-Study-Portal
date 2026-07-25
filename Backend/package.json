@@ -1,19 +1,33 @@
 {
-    "name": "m15-backend",
-    "version": "1.0.0",
-    "description": "Student Study Portal - Backend API",
-    "main": "server.js",
-    "scripts": {
-        "start": "node server.js",
-        "dev": "nodemon server.js"
-    },
-    "dependencies": {
-        "express": "^4.18.2",
-        "cors": "^2.8.5",
-        "dotenv": "^16.0.3",
-        "pg": "^8.10.0"
-    },
-    "devDependencies": {
-        "nodemon": "^2.0.22"
-    }
+  "name": "m14-public-api",
+  "version": "1.0.0",
+  "description": "Public API & Developer Portal - Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "worker": "node workers/webhookWorker.js",
+    "dev:worker": "nodemon workers/webhookWorker.js",
+    "validate:openapi": "node validateSpec.js",
+    "test": "jest --testTimeout=15000"
+  },
+  "dependencies": {
+    "@upstash/ratelimit": "^2.0.8",
+    "@upstash/redis": "^1.38.0",
+    "bullmq": "^5.34.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "helmet": "^7.0.0",
+    "ioredis": "^5.4.2",
+    "pg": "^8.22.0",
+    "swagger-ui-express": "^4.6.3",
+    "yamljs": "^0.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22",
+    "jest": "^29.7.0",
+    "@apidevtools/swagger-parser": "^10.1.0"
+  }
 }
