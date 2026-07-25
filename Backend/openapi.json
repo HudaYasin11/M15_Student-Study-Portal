@@ -1,0 +1,171 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "M-14 Public API",
+    "version": "v1",
+    "description": "Public API for the exam platform — exams, enrollments, results, certificates, and webhooks. All endpoints (except key generation) require an API key."
+  },
+  "servers": [{ "url": "http://localhost:5000" }],
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "Pass your API key as: Authorization: Bearer sk_live_..."
+      }
+    }
+  },
+  "security": [{ "ApiKeyAuth": [] }],
+  "paths": {
+    "/api/keys": {
+      "post": {
+        "summary": "Generate a new API key",
+        "security": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "example": "My integration" },
+                  "scopes": { "type": "array", "items": { "type": "string" }, "example": ["read", "write"] },
+                  "sandbox": { "type": "boolean", "example": true }
+                },
+                "required": ["name"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Key created — apiKey field shown ONLY in this response" }
+        }
+      },
+      "get": {
+        "summary": "List all API keys (metadata only, never the plain key)",
+        "responses": { "200": { "description": "List of keys" } }
+      }
+    },
+    "/api/v1/exams": {
+      "get": {
+        "summary": "List exams (scoped to your key's sandbox/live world)",
+        "responses": { "200": { "description": "List of exams" } }
+      },
+      "post": {
+        "summary": "Create an exam (requires write scope)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "duration": { "type": "integer" }
+                },
+                "required": ["title"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Exam created" } }
+      }
+    },
+    "/api/v1/enrollments": {
+      "post": {
+        "summary": "Enroll a user in an exam (requires write scope)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "userId": { "type": "integer" },
+                  "examId": { "type": "integer" }
+                },
+                "required": ["userId", "examId"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Enrollment created" } }
+      }
+    },
+    "/api/v1/results": {
+      "post": {
+        "summary": "Submit a result for an enrollment (requires write scope)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enrollmentId": { "type": "integer" },
+                  "score": { "type": "number" },
+                  "passed": { "type": "boolean" }
+                },
+                "required": ["enrollmentId", "score", "passed"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Result recorded" } }
+      }
+    },
+    "/api/v1/certificates": {
+      "post": {
+        "summary": "Issue a certificate for a passed result (requires write scope). Triggers certificate.issued webhooks.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": { "resultId": { "type": "integer" } },
+                "required": ["resultId"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Certificate issued" } }
+      }
+    },
+    "/api/v1/certificates/{code}": {
+      "get": {
+        "summary": "Verify a certificate by its public code",
+        "parameters": [
+          { "name": "code", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "Certificate details if valid" } }
+      }
+    },
+    "/api/v1/webhooks": {
+      "post": {
+        "summary": "Subscribe a URL to receive event notifications (requires write scope)",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "targetUrl": { "type": "string", "example": "https://your-app.com/webhook" },
+                  "events": { "type": "array", "items": { "type": "string" }, "example": ["certificate.issued"] }
+                },
+                "required": ["targetUrl"]
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "Subscription created — secret shown ONLY here" } }
+      },
+      "get": {
+        "summary": "List your webhook subscriptions",
+        "responses": { "200": { "description": "List of subscriptions" } }
+      }
+    },
+    "/api/v1/logs": {
+      "get": {
+        "summary": "View your recent API request history",
+        "responses": { "200": { "description": "List of recent requests" } }
+      }
+    }
+  }
+}
